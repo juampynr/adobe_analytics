@@ -41,6 +41,10 @@ function adobe_analytics_page_bottom(&$variables) {
   $variables['adobe_analtics'] = [
     '#lazy_builder' => ['adobe_analytics.adobe_analytics_helper:renderMarkup', []],
     '#create_placeholder' => TRUE,
+    '#cache' => [
+      'contexts' => ['user.roles'],
+      'tags' => \Drupal::config('adobe_analytics.settings')->getCacheTags(),
+    ],
   ];
 }
 

@@ -163,7 +163,6 @@ class AdobeAnalyticsHelper {
    *   Build array.
    */
   public function renderMarkup() {
-
     if ($this->skipTracking()) {
       return [];
     }
@@ -204,9 +203,6 @@ class AdobeAnalyticsHelper {
 
     $build = [
       '#theme' => 'analytics_code',
-      '#cache' => [
-        'max-age' => 0,
-      ],
       '#js_file_location' => $js_file_location,
       '#version' => $version,
       '#image_location' => $nojs,

@@ -103,17 +103,28 @@ class AdobeAnalyticsGeneralTest extends BrowserTestBase {
       $this->assertInvalidVar($name, $this->randomMachineName(8));
     }
   }
-//
-//  function testSiteCatalystRolesTracking() {
-//    variable_set('sitecatalyst_track_authenticated_user', 1);
-//    variable_set('sitecatalyst_role_tracking_type', 'inclusive');
-//
-//    $this->drupalGet('<front>');
-//    $this->assertTrackingCode();
-//
-//    variable_set('sitecatalyst_role_tracking_type', 'exclusive');
-//    $this->drupalGet('<front>');
-//    $this->assertNoTrackingCode();
-//  }
+
+  function testSiteCatalystRolesTracking() {
+    // Test that anonymous users can see the tracking code.
+    \Drupal::configFactory()->getEditable('adobe_analytics.settings')
+      ->set('track_roles', [
+        'anonymous' => 'anonymous',
+        'authenticated' => '0',
+        'administrator' => '0',
+      ])
+      ->set('role_tracking_type', 'inclusive')
+      ->save();
+
+    $this->drupalGet('<front>');
+    $this->assertTrackingCode();
+
+    // Test that anonymous users cannot see the tracking code.
+    \Drupal::configFactory()->getEditable('adobe_analytics.settings')
+      ->set('role_tracking_type', 'exclusive')
+      ->save();
+
+    $this->drupalGet('<front>');
+    $this->assertNoTrackingCode();
+  }
 
 }
