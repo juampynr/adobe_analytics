@@ -20,7 +20,7 @@ adobe_analytics.settings:
     token_cache_lifetime:
       type: integer
       label: 'Token cache lifetime'
-    extra_variables:
+    extra_variables.*:
       type: sequence
       label: 'Extra variables'
       sequence:
