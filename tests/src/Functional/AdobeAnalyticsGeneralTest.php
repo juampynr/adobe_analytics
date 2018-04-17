@@ -50,61 +50,59 @@ class AdobeAnalyticsGeneralTest extends BrowserTestBase {
   }
 
   function assertNoTrackingCode() {
-    $this->assertNoRaw("<!-- SiteCatalyst code version: ", 'The SiteCatalyst code was not found.');
-    $this->assertNoRaw(variable_get("sitecatalyst_js_file_location"), 'The SiteCatalyst js file was properly omitted.');
-    $this->assertNoRaw(variable_get("sitecatalyst_image_file_location"), 'The SiteCatalyst backup image was properly omitted.');
-    $this->assertNoRaw(variable_get("sitecatalyst_version"), 'The SiteCatalyst version was omitted.');
+    $config = \Drupal::config('adobe_analytics.settings');
+    $this->assertSession()->responseNotContains('<!-- AdobeAnalytics code version: ');
+    $this->assertSession()->responseNotContains($config->get('js_file_location'));
+    $this->assertSession()->responseNotContains($config->get('image_file_location'));
+    $this->assertSession()->responseNotContains($config->get('version'));
   }
 
-  function assertSiteCatalystVar($name, $value, $message = '') {
-    $message = empty($message) ? 'The SiteCatalyst variable was correctly included.' : $message;
-
+  function assertVar($name, $value, $message = '') {
     $edit = array(
-      'sitecatalyst_variables[0][name]' => $name,
-      'sitecatalyst_variables[0][value]' => $value,
+      'variables[0][name]' => $name,
+      'variables[0][value]' => $value,
     );
-    $this->drupalPost('admin/config/system/sitecatalyst', $edit, t('Save configuration'));
+    $this->drupalPostForm('admin/config/system/adobeanalytics', $edit, 'Save configuration');
     $this->drupalGet('node');
-    $this->assertRaw($name . '="' . $value . '";', $message);
+    $this->assertSession()->responseContains($name . '="' . $value . '";');
   }
 
-  function assertInvalidSiteCatalystVar($name, $value, $message = '') {
-    $message = empty($message) ? 'The SiteCalalyst variable was correctly reported as invalid.' : $message;
+  function assertInvalidVar($name, $value, $message = '') {
     $edit = array(
-      'sitecatalyst_variables[0][name]' => $name,
-      'sitecatalyst_variables[0][value]' => $value,
+      'variables[0][name]' => $name,
+      'variables[0][value]' => $value,
     );
-    $this->drupalPost('admin/config/system/sitecatalyst', $edit, t('Save configuration'));
-    $this->assertText(t('This is not a valid variable name. It must start with a letter, $ or _ and cannot contain spaces.'), $message);
+    $this->drupalPostForm('admin/config/system/adobeanalytics', $edit, 'Save configuration');
+    $this->assertSession()->responseContains('This is not a valid variable name. It must start with a letter, $ or _ and cannot contain spaces.');
   }
 
-  function testSiteCatalystTrackingCode() {
+  function testTrackingCode() {
     $this->drupalGet('<front>');
     $this->assertTrackingCode();
   }
 
-//  function testSiteCatalystVariables() {
-//    // Test that variables with valid names are added properly.
-//    $valid_vars = array(
-//      $this->randomName(8),
-//      $this->randomName(8) . '7',
-//      '$' . $this->randomName(8),
-//      '_' . $this->randomName(8),
-//    );
-//    foreach ($valid_vars as $name) {
-//      $this->assertSiteCatalystVar($name, $this->randomName(8));
-//    }
-//
-//    // Test that invalid variable names are not allowed.
-//    $invalid_vars = array(
-//      '7' . $this->randomName(8),
-//      $this->randomName(8) . ' ' . $this->randomName(8),
-//      '#' . $this->randomName(8),
-//    );
-//    foreach ($invalid_vars as $name) {
-//      $this->assertInvalidSiteCatalystVar($name, $this->randomName(8));
-//    }
-//  }
+  function testVariables() {
+    // Test that variables with valid names are added properly.
+    $valid_vars = array(
+      $this->randomMachineName(8),
+      $this->randomMachineName(8) . '7',
+      '$' . $this->randomMachineName(8),
+      '_' . $this->randomMachineName(8),
+    );
+    foreach ($valid_vars as $name) {
+      $this->assertVar($name, $this->randomMachineName(8));
+    }
+
+    // Test that invalid variable names are not allowed.
+    $invalid_vars = array(
+      '7' . $this->randomMachineName(8),
+      $this->randomMachineName(8) . ' ' . $this->randomMachineName(8),
+      '#' . $this->randomMachineName(8),
+    );
+    foreach ($invalid_vars as $name) {
+      $this->assertInvalidVar($name, $this->randomMachineName(8));
+    }
+  }
 //
 //  function testSiteCatalystRolesTracking() {
 //    variable_set('sitecatalyst_track_authenticated_user', 1);

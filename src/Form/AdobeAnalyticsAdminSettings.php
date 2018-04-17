@@ -208,6 +208,7 @@ class AdobeAnalyticsAdminSettings extends ConfigFormBase {
       '#title' => $this->t('Name'),
       '#default_value' => isset($data['name']) ? $data['name'] : '',
       '#attributes' => ['class' => ['field-variable-name']],
+      '#element_validate' => [[$this, 'validateVariableName']],
     ];
     $form['variables']['variables'][$index]['value'] = [
       '#type' => 'textfield',
@@ -248,6 +249,26 @@ class AdobeAnalyticsAdminSettings extends ConfigFormBase {
     $input = $form_state->getUserInput();
     $form_state->set('variables', $input['variables']);
     $form_state->setRebuild();
+  }
+
+  /**
+   * #element_validate callback to ensure that variable names are valid.
+   *
+   * @param array $element
+   *   An associative array containing the properties and children of the
+   *   generic form element.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   * @param array $complete_form
+   *   The complete form structure.
+   */
+  public function validateVariableName(array &$element, FormStateInterface $form_state, array &$complete_form) {
+    $variable_name = $element['#value'];
+
+    // Variable names must follow the rules defined by javascript syntax.
+    if (!empty($variable_name) && !preg_match("/^[A-Za-z_$]{1}\S*$/", $variable_name)) {
+      $form_state->setError($element, $this->t('This is not a valid variable name. It must start with a letter, $ or _ and cannot contain spaces.'));
+    }
   }
 
   /**
