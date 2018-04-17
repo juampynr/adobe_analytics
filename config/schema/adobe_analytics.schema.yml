@@ -20,15 +20,26 @@ adobe_analytics.settings:
     token_cache_lifetime:
       type: integer
       label: 'Token cache lifetime'
-    extra_variables.*:
+    extra_variables:
       type: sequence
       label: 'Extra variables'
       sequence:
-        type: string
-        label: 'The extra variables'
+        type: adobe_analytics.variable
+        label: 'Variable'
     track_roles:
       type: sequence
       label: 'Track roles'
       sequence:
         type: string
         label: 'Roles to track or not track'
+
+adobe_analytics.variable:
+  type: config_object
+  label: 'Adobe Analytics variable'
+  mapping:
+    name:
+      type: string
+      label: 'Name'
+    value:
+      type: string
+      label: 'Value'
