@@ -119,7 +119,7 @@ class AdobeAnalyticsAdminSettings extends ConfigFormBase {
     $form['variables']['actions']['add_variable'] = [
       '#type' => 'submit',
       '#value' => t('Add variable'),
-      '#submit' => array('::addVariable'),
+      '#submit' => ['::addVariable'],
       '#ajax' => [
         'callback' => '::addVariableCallback',
         'wrapper' => 'variables-details-wrapper',
@@ -252,7 +252,7 @@ class AdobeAnalyticsAdminSettings extends ConfigFormBase {
   }
 
   /**
-   * #element_validate callback to ensure that variable names are valid.
+   * Element validate callback to ensure that variable names are valid.
    *
    * @param array $element
    *   An associative array containing the properties and children of the

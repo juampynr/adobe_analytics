@@ -94,7 +94,7 @@ class AdobeAnalyticsHelper {
   /**
    * Replace tokens.
    */
-  public function adobeAnalyticsTokenReplace($text, $data = array(), array $options = array()) {
+  public function adobeAnalyticsTokenReplace($text, $data = [], array $options = []) {
 
     // Short-circuit the degenerate case, just like token_replace() does.
     $text_tokens = $this->token->replace($text);
@@ -106,7 +106,7 @@ class AdobeAnalyticsHelper {
   /**
    * Format the variables like key value pair;.
    */
-  public function adobeAnalyticsFormatVariables($variables = array()) {
+  public function adobeAnalyticsFormatVariables($variables = []) {
 
     $extra_variables = $this->getVariables();
 
@@ -136,9 +136,9 @@ class AdobeAnalyticsHelper {
    * defined with hook_adobe_analytics_variables().
    *
    * @param string $name
-   *    Extra variable name.
+   *   Extra variable name.
    * @param string $value
-   *    Value of the the name variable.
+   *   Value of the the name variable.
    */
   public function setVariable($name = NULL, $value = NULL) {
     if (!empty($name)) {
@@ -186,10 +186,10 @@ class AdobeAnalyticsHelper {
       // Add any custom code snippets if specified and replace any tokens.
       $context = $this->adobeAnalyticsGetTokenContext();
       $formatted_vars .= $this->adobeAnalyticsTokenReplace(
-          $this->config->get('codesnippet'), $context, array(
+          $this->config->get('codesnippet'), $context, [
             'clear' => TRUE,
             'sanitize' => TRUE,
-          )
+          ]
         ) . "\n";
     }
 
@@ -218,11 +218,11 @@ class AdobeAnalyticsHelper {
   public function skipTracking() {
     // Check if we should track the currently active user's role.
     $track_user = TRUE;
-    $get_roles = array();
+    $get_roles = [];
     $tracking_type = $this->config->get('role_tracking_type');
     $stored_roles = $this->config->get('track_roles');
     if ($stored_roles) {
-      $get_roles = array();
+      $get_roles = [];
       foreach ($stored_roles as $key => $value) {
         if ($value) {
           // Get all the selected roles.

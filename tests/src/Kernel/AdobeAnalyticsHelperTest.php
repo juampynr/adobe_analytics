@@ -2,7 +2,6 @@
 
 namespace Drupal\Tests\adobe_analytics\Kernel;
 
-use Drupal\block\Entity\Block;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
@@ -25,9 +24,9 @@ class AdobeAnalyticsHelperTest extends KernelTestBase {
   ];
 
   /**
-   * @var \Drupal\adobe_analytics\AdobeAnalyticsHelper
-   *
    * An instance of the AdobeAnalyticsHelper service.
+   *
+   * @var \Drupal\adobe_analytics\AdobeAnalyticsHelper
    */
   protected $adobeAnalyticsHelper;
 
@@ -65,16 +64,14 @@ class AdobeAnalyticsHelperTest extends KernelTestBase {
   /**
    * Tests token replacement.
    *
-   *
-   *
-   * @covers ::adobeAnalyticsTokenReplace
-   *
-   * @dataProvider adobeAnalyticsTokenReplaceProvider
-   *
    * @param string $input_string
    *   The input string.
    * @param string $expected_string
    *   The expected string.
+   *
+   * @covers ::adobeAnalyticsTokenReplace
+   *
+   * @dataProvider adobeAnalyticsTokenReplaceProvider
    */
   public function testAdobeAnalyticsTokenReplace($input_string, $expected_string) {
     $string_processed = $this->adobeAnalyticsHelper->adobeAnalyticsTokenReplace($input_string);

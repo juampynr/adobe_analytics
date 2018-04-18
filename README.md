@@ -40,18 +40,22 @@ Note: Do not forget to rename the functions.
 
 <?php
 
+/**
+ * @file
+ */
+
   /**
    * Implements hook_adobe_analytics_variables().
    */
   function mymodule_adobe_analytics_variables() {
   // Initialize a variables array to be returned by this hook.
-  $variables = array();
+  $variables = [];
   $config_var = \Drupal::config('adobe_anlaytics.settings')->get('track_search_engine', 0);
   if ($config_var) {
     $variables['referring_search_engine'] = 'none';
 
     // Create a list of possible search engines that my site cares about.
-    $search_engines = array('google.com', 'yahoo.com', 'bing.com', 'ask.com');
+    $search_engines = ['google.com', 'yahoo.com', 'bing.com', 'ask.com'];
 
     // Get the referring URL.
     $referer = $_SERVER['HTTP_REFERER'];
@@ -69,20 +73,20 @@ Note: Do not forget to rename the functions.
   // Lets assume we need a variable called "date" and that for some reason it
   // *must* come before all the other variables. Note that if you have a
   // variable that must come at the end you can use "footer" as well.
-  $header = array('date' => date('Ymd'));
+  $header = ['date' => date('Ymd')];
 
-  return array('variables' => $variables, 'header' => $header);
+  return ['variables' => $variables, 'header' => $header];
   }
 
   /**
    * Implements hook_form_FORM_ID_alter().
    */
   function mymodule_form_adobe_anlaytics_admin_settings_alter(&$form, &$form_state) {
-    $form['general']['adobe_anlaytics_track_search_engine'] = array(
+    $form['general']['adobe_anlaytics_track_search_engine'] = [
       '#type' => 'checkbox',
       '#title' => t('Track the referring search engine for every request'),
       '#default_value' => \Drupal::config(adobe_anlaytics . settings)->get('track_search_engine', 0),
-    );
+    ];
   }
 
 ?>

@@ -17,20 +17,20 @@ class AdobeAnalyticsGeneralTest extends BrowserTestBase {
   public static $modules = ['adobe_analytics'];
 
   /**
-   * @var \Drupal\Core\Session\AccountInterface
-   *
    * The admin user account.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
    */
   protected $adminUser;
 
   /**
    * Implementation of setUp().
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Create an admin user with all the permissions needed to run tests.
-    $this->adminUser = $this->drupalCreateUser(array('administer adobe analytics configuration', 'access administration pages'));
+    $this->adminUser = $this->drupalCreateUser(['administer adobe analytics configuration', 'access administration pages']);
     $this->drupalLogin($this->adminUser);
 
     // Set some default settings.
@@ -41,7 +41,10 @@ class AdobeAnalyticsGeneralTest extends BrowserTestBase {
       ->save();
   }
 
-  function assertTrackingCode() {
+  /**
+   * Asserts that tracking code is present in page.
+   */
+  public function assertTrackingCode() {
     $config = \Drupal::config('adobe_analytics.settings');
     $this->assertSession()->responseContains('<!-- AdobeAnalytics code version: ');
     $this->assertSession()->responseContains($config->get('js_file_location'));
@@ -49,7 +52,10 @@ class AdobeAnalyticsGeneralTest extends BrowserTestBase {
     $this->assertSession()->responseContains($config->get('version'));
   }
 
-  function assertNoTrackingCode() {
+  /**
+   * Assets that tracking code is not present in page.
+   */
+  public function assertNoTrackingCode() {
     $config = \Drupal::config('adobe_analytics.settings');
     $this->assertSession()->responseNotContains('<!-- AdobeAnalytics code version: ');
     $this->assertSession()->responseNotContains($config->get('js_file_location'));
@@ -57,54 +63,69 @@ class AdobeAnalyticsGeneralTest extends BrowserTestBase {
     $this->assertSession()->responseNotContains($config->get('version'));
   }
 
-  function assertVar($name, $value, $message = '') {
-    $edit = array(
+  /**
+   * Asserts that the response contains a variable.
+   */
+  public function assertVar($name, $value, $message = '') {
+    $edit = [
       'variables[0][name]' => $name,
       'variables[0][value]' => $value,
-    );
+    ];
     $this->drupalPostForm('admin/config/system/adobeanalytics', $edit, 'Save configuration');
     $this->drupalGet('node');
     $this->assertSession()->responseContains($name . '="' . $value . '";');
   }
 
-  function assertInvalidVar($name, $value, $message = '') {
-    $edit = array(
+  /**
+   * Asserts that invalid variable names are not allowed.
+   */
+  public function assertInvalidVar($name, $value, $message = '') {
+    $edit = [
       'variables[0][name]' => $name,
       'variables[0][value]' => $value,
-    );
+    ];
     $this->drupalPostForm('admin/config/system/adobeanalytics', $edit, 'Save configuration');
     $this->assertSession()->responseContains('This is not a valid variable name. It must start with a letter, $ or _ and cannot contain spaces.');
   }
 
-  function testTrackingCode() {
+  /**
+   * Tests that the tracking code is present at the front page.
+   */
+  public function testTrackingCode() {
     $this->drupalGet('<front>');
     $this->assertTrackingCode();
   }
 
-  function testVariables() {
+  /**
+   * Tests the logic to save and validate variables.
+   */
+  public function testVariables() {
     // Test that variables with valid names are added properly.
-    $valid_vars = array(
+    $valid_vars = [
       $this->randomMachineName(8),
       $this->randomMachineName(8) . '7',
       '$' . $this->randomMachineName(8),
       '_' . $this->randomMachineName(8),
-    );
+    ];
     foreach ($valid_vars as $name) {
       $this->assertVar($name, $this->randomMachineName(8));
     }
 
     // Test that invalid variable names are not allowed.
-    $invalid_vars = array(
+    $invalid_vars = [
       '7' . $this->randomMachineName(8),
       $this->randomMachineName(8) . ' ' . $this->randomMachineName(8),
       '#' . $this->randomMachineName(8),
-    );
+    ];
     foreach ($invalid_vars as $name) {
       $this->assertInvalidVar($name, $this->randomMachineName(8));
     }
   }
 
-  function testSiteCatalystRolesTracking() {
+  /**
+   * Test the logic to toggle tracking code based on the role.
+   */
+  public function testSiteCatalystRolesTracking() {
     $this->drupalLogout();
 
     // Test that anonymous users can see the tracking code.
