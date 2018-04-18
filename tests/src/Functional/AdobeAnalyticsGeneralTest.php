@@ -105,6 +105,8 @@ class AdobeAnalyticsGeneralTest extends BrowserTestBase {
   }
 
   function testSiteCatalystRolesTracking() {
+    $this->drupalLogout();
+
     // Test that anonymous users can see the tracking code.
     \Drupal::configFactory()->getEditable('adobe_analytics.settings')
       ->set('track_roles', [
