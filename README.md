@@ -1,3 +1,6 @@
+[![CircleCI](https://circleci.com/gh/juampynr/adobe_analytics.svg?style=svg)](https://circleci.com/gh/juampynr/adobe_analytics)
+[![Coverage Status](https://coveralls.io/repos/github/juampynr/adobe_analytics/badge.svg?branch=8.x-1.x)](https://coveralls.io/github/juampynr/adobe_analytics?branch=8.x-1.x)
+
 Module: AdobeAnalytics Integration
 Author: Alexander Ross (bleen18) http://bleen.net
 Based on code originally written by

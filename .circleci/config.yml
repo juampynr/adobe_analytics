@@ -18,9 +18,6 @@ defaults: &defaults
     # specify the version you desire here (avoid latest except for testing)
     - image: andrewberry/drupal_tests:0.3.4
 
-    # Use our fork until https://github.com/wernight/docker-phantomjs/pull/3 is
-    # merged.
-    # - image: wernight/phantomjs:2.1.1
     - image: selenium/standalone-chrome-debug:3.7.1-beryllium
 
     - image: mariadb:10.3
@@ -88,6 +85,7 @@ unit_kernel_tests: &unit_kernel_tests
     - run:
         working_directory: /var/www/html
         command: |
+          cp ./modules/$CIRCLE_PROJECT_REPONAME/.circleci/hooks/test.sh /var/www/html
           ./test.sh $CIRCLE_PROJECT_REPONAME
 
     - store_test_results:
@@ -114,22 +112,6 @@ code_sniffer: &code_sniffer
     - store_artifacts:
         path: /var/www/html/artifacts
 
-# Run code coverage tests. This invokes code-coverage-stats.sh.
-code_coverage: &code_coverage
-  <<: *defaults
-  steps:
-    - attach_workspace:
-        at: /var/www/html
-
-    - checkout
-
-    - run:
-        working_directory: /var/www/html
-        command: |
-          ./code-coverage-stats.sh $CIRCLE_PROJECT_REPONAME
-    - store_artifacts:
-        path: /var/www/html/artifacts
-
 # Declare all of the jobs we should run.
 version: 2
 jobs:
@@ -139,8 +121,6 @@ jobs:
      <<: *unit_kernel_tests
   run-code-sniffer:
      <<: *code_sniffer
-  run-code-coverage:
-     <<: *code_coverage
 
 workflows:
   version: 2
@@ -155,7 +135,3 @@ workflows:
       - run-code-sniffer:
           requires:
             - update-dependencies
-      - run-code-coverage:
-          requires:
-            - update-dependencies
-            - run-unit-kernel-tests
