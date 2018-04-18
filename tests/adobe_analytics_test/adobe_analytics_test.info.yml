@@ -4,4 +4,4 @@ description: Test module for Adobe Analytics
 package: Testing
 core: 8.x
 dependencies:
-  - adobe_analytics
+  - drupal:adobe_analytics

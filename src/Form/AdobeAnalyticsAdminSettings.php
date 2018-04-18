@@ -118,7 +118,7 @@ class AdobeAnalyticsAdminSettings extends ConfigFormBase {
     ];
     $form['variables']['actions']['add_variable'] = [
       '#type' => 'submit',
-      '#value' => t('Add variable'),
+      '#value' => $this->t('Add variable'),
       '#submit' => ['::addVariable'],
       '#ajax' => [
         'callback' => '::addVariableCallback',

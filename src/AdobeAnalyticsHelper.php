@@ -4,6 +4,7 @@ namespace Drupal\adobe_analytics;
 
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Routing\AdminContext;
 use Drupal\Core\Routing\CurrentRouteMatch;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Utility\Token;
@@ -18,11 +19,25 @@ class AdobeAnalyticsHelper {
   const ADOBEANALYTICS_TOKEN_CACHE = 'adobe_analytics:tag_token_results';
 
   /**
+   * The route admin context to determine whether a route is an admin one.
+   *
+   * @var \Drupal\Core\Routing\AdminContext
+   */
+  protected $adminContext;
+
+  /**
    * The CurrentRouteMatch service.
    *
    * @var \Drupal\Core\Routing\CurrentRouteMatch
    */
   protected $currentRouteMatch;
+
+  /**
+   * Current user object.
+   *
+   * @var \Drupal\Core\Session\AccountProxyInterface
+   */
+  protected $currentUser;
 
   /**
    * The ModuleHandler service.
@@ -53,13 +68,6 @@ class AdobeAnalyticsHelper {
   protected $context;
 
   /**
-   * Current user object.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
-   */
-  protected $currentUser;
-
-  /**
    * Adobe config settings.
    *
    * @var \Drupal\Core\Config\ImmutableConfig
@@ -68,13 +76,27 @@ class AdobeAnalyticsHelper {
 
   /**
    * Constructs an AdobeAnalyticsHelper object.
+   *
+   * @param \Drupal\Core\Config\ConfigFactory $config_factory
+   *   The config factory service.
+   * @param \Drupal\Core\Routing\CurrentRouteMatch $currentRouteMatch
+   *   The route matching service.
+   * @param \Drupal\Core\Session\AccountProxyInterface $current_user
+   *   The current user account.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
+   *   The module handler service.
+   * @param \Drupal\Core\Routing\AdminContext $admin_context
+   *   The admin context service.
+   * @param \Drupal\Core\Utility\Token $token
+   *   The token service.
    */
-  public function __construct(CurrentRouteMatch $currentRouteMatch, ModuleHandlerInterface $moduleHandler, Token $token, AccountProxyInterface $current_user, ConfigFactory $config_factory) {
-    $this->currentRouteMatch = $currentRouteMatch;
-    $this->moduleHandler = $moduleHandler;
-    $this->token = $token;
-    $this->currentUser = $current_user;
+  public function __construct(ConfigFactory $config_factory, CurrentRouteMatch $currentRouteMatch, AccountProxyInterface $current_user, ModuleHandlerInterface $moduleHandler, AdminContext $admin_context, Token $token) {
     $this->config = $config_factory->get('adobe_analytics.settings');
+    $this->currentRouteMatch = $currentRouteMatch;
+    $this->currentUser = $current_user;
+    $this->moduleHandler = $moduleHandler;
+    $this->adminContext = $admin_context;
+    $this->token = $token;
   }
 
   /**
@@ -176,7 +198,7 @@ class AdobeAnalyticsHelper {
     // Right order is the code file (list likely to be maintained)
     // Then admin settings with codesnippet first and finally taxonomy->vars.
     $formatted_vars = '';
-    $adobe_analytics_hooked_vars = \Drupal::moduleHandler()->invokeAll('adobe_analytics_variables', []);
+    $adobe_analytics_hooked_vars = $this->moduleHandler->invokeAll('adobe_analytics_variables', []);
 
     if (!empty($adobe_analytics_hooked_vars['header'])) {
       $formatted_vars = $this->adobeAnalyticsFormatVariables($adobe_analytics_hooked_vars['header']);
@@ -247,7 +269,7 @@ class AdobeAnalyticsHelper {
     }
 
     // Don't track page views in the admin sections, or for certain roles.
-    $is_admin = \Drupal::service('router.admin_context')->isAdminRoute();
+    $is_admin = $this->adminContext->isAdminRoute();
     if ($is_admin || $track_user == FALSE) {
       return TRUE;
     }
