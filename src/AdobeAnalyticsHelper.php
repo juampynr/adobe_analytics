@@ -189,38 +189,47 @@ class AdobeAnalyticsHelper {
       return [];
     }
 
+    // Extract module settings.
     $js_file_location = $this->config->get('js_file_location');
     $codesnippet = $this->config->get('codesnippet');
     $version = $this->config->get("version");
     $nojs = !empty($this->config->get("image_file_location")) ? $this->config->get("image_file_location") : NULL;
 
+
+    // Extract entity overrides.
+    list ($include_main_codesnippet, $include_custom_variables, $entity_snippet) = $this->extractEntityOverrides();
+
     // Format and combine variables in the "right" order
     // Right order is the code file (list likely to be maintained)
     // Then admin settings with codesnippet first and finally taxonomy->vars.
     $formatted_vars = '';
+
+    // Load variables implemented by modules.
     $adobe_analytics_hooked_vars = $this->moduleHandler->invokeAll('adobe_analytics_variables', []);
 
-    if (!empty($adobe_analytics_hooked_vars['header'])) {
+    // Append header variables.
+    if ($include_custom_variables && !empty($adobe_analytics_hooked_vars['header'])) {
       $formatted_vars = $this->adobeAnalyticsFormatVariables($adobe_analytics_hooked_vars['header']);
     }
 
-    if (!empty($codesnippet)) {
-      // Add any custom code snippets if specified and replace any tokens.
-      $context = $this->adobeAnalyticsGetTokenContext();
-      $formatted_vars .= $this->adobeAnalyticsTokenReplace(
-          $this->config->get('codesnippet'), $context, [
-            'clear' => TRUE,
-            'sanitize' => TRUE,
-          ]
-        ) . "\n";
+    // Append main JavaScript snippet.
+    if ($include_main_codesnippet && !empty($codesnippet)) {
+      $formatted_vars .= $this->formatJsSnippet($codesnippet);
     }
 
-    if (!empty($adobe_analytics_hooked_vars['variables'])) {
+    // Append main variables.
+    if ($include_custom_variables && !empty($adobe_analytics_hooked_vars['variables'])) {
       $formatted_vars .= $this->adobeAnalyticsFormatVariables($adobe_analytics_hooked_vars['variables']);
     }
 
-    if (!empty($adobe_analytics_hooked_vars['footer'])) {
+    // Append footer variables.
+    if ($include_custom_variables && !empty($adobe_analytics_hooked_vars['footer'])) {
       $formatted_vars .= $this->adobeAnalyticsFormatVariables($adobe_analytics_hooked_vars['footer']);
+    }
+
+    // Append entity's custom snippet.
+    if (!empty($entity_snippet)) {
+      $formatted_vars .= $this->formatJsSnippet($entity_snippet);
     }
 
     $build = [
@@ -275,6 +284,62 @@ class AdobeAnalyticsHelper {
     }
 
     return FALSE;
+  }
+
+  /**
+   * Extracts entity overrides when the entity has an Adobe Analytics field.
+   *
+   * @return array
+   *   An array containing:
+   *     * A flag for whether to include the global custom JavaScript snippet.
+   *     * A flag for whether to include the global custom variables.
+   *     * A string with a custom JavaScript snippet, or an empty string.
+   */
+  protected function extractEntityOverrides() {
+    // Check if we are viewing an entity containing field overrides.
+    $entity_field_manager = \Drupal::service('entity_field.manager');
+    $route_match = \Drupal::routeMatch();
+    $entity = NULL;
+    $field_name = NULL;
+    foreach ($entity_field_manager->getFieldMapByFieldType('adobe_analytics') as $entity_type => $field_config) {
+      if ($entity = $route_match->getParameter($entity_type)) {
+        $field_name = key($field_config);
+        break;
+      }
+    }
+
+    $include_main_codesnippet = TRUE;
+    $include_custom_variables = TRUE;
+    $entity_snippet = '';
+    if (!empty($entity) && !$entity->{$field_name}->isEmpty()) {
+      $entity_values = $entity->{$field_name}->first()->getValue();
+      $include_main_codesnippet = $entity_values['include_main_codesnippet'];
+      $include_custom_variables = $entity_values['include_custom_variables'];
+      $entity_snippet = $entity_values['codesnippet'];
+    }
+
+    return [$include_main_codesnippet, $include_custom_variables, $entity_snippet];
+  }
+
+  /**
+   * Processes tokens and formats a JavaScript snippet.
+   *
+   * @param string $raw_snippet
+   *   The raw snippet.
+   *
+   * @return string
+   *   The processed snippet.
+   */
+  protected function formatJsSnippet($raw_snippet) {
+    // Add any custom code snippets if specified and replace any tokens.
+    $context = $this->adobeAnalyticsGetTokenContext();
+    $snippet = $this->adobeAnalyticsTokenReplace(
+        $raw_snippet, $context, [
+          'clear' => TRUE,
+          'sanitize' => TRUE,
+        ]
+      ) . "\n";
+    return $snippet;
   }
 
 }
