@@ -1,33 +1,24 @@
-[![CircleCI](https://circleci.com/gh/juampynr/adobe_analytics.svg?style=svg)](https://circleci.com/gh/juampynr/adobe_analytics)
-[![Coverage Status](https://coveralls.io/repos/github/juampynr/adobe_analytics/badge.svg?branch=8.x-1.x)](https://coveralls.io/github/juampynr/adobe_analytics?branch=8.x-1.x)
-
-Module: AdobeAnalytics Integration
-Author: Alexander Ross (bleen18) http://bleen.net
-Based on code originally written by
- * Greg Knaddison (greggles) http://knaddison.com
- * Matthew Tucker (ultimateboy)
-who based code on the Google Analytics module by Mike Carter www.ixis.co.uk
-
-
-Description
-===========
 Adds the Adobe Analytics system to your website.
 
-
-Requirements
-============
-
-* Adobe Analytics user account
+# Requirements
+* Token module.
 
 
-Installation
-============
-* Copy the 'adobe_analytics' module directory in to your Drupal
-modules directory as usual.
+# Installation
+Install like any other module via Drush or the web administration interface. 
 
+# Configuration
+Navigate to Administration > Configuration > Adobe Analytics, where
+the main configuration settings live. These apply to all
+non-administration pages and support additional conditions based
+on the role of the user making a request.
 
-Customization
-=============
+If you need to override or extend the settings in a particular
+entity, then add a field of type Adobe Analytics to the entity bundle. Once
+you have done that, the edit form of an entity will show an Adobe Analytics
+section where you can override the global settings.
+
+## API
 Here is an example of module code that you can use to create variables more
 suited to tracking your needs by utilizing hook_adobe_analytics_variables().
 This code should go in your custom module's .module file and modified
@@ -38,16 +29,16 @@ variable.
 
 Note: Do not forget to rename the functions.
 
-<?php
+```php
 
 /**
  * @file
  */
 
-  /**
-   * Implements hook_adobe_analytics_variables().
-   */
-  function mymodule_adobe_analytics_variables() {
+/**
+* Implements hook_adobe_analytics_variables().
+*/
+function mymodule_adobe_analytics_variables() {
   // Initialize a variables array to be returned by this hook.
   $variables = [];
   $config_var = \Drupal::config('adobe_anlaytics.settings')->get('track_search_engine', 0);
@@ -76,30 +67,17 @@ Note: Do not forget to rename the functions.
   $header = ['date' => date('Ymd')];
 
   return ['variables' => $variables, 'header' => $header];
-  }
+}
 
-  /**
-   * Implements hook_form_FORM_ID_alter().
-   */
-  function mymodule_form_adobe_anlaytics_admin_settings_alter(&$form, &$form_state) {
-    $form['general']['adobe_anlaytics_track_search_engine'] = [
-      '#type' => 'checkbox',
-      '#title' => t('Track the referring search engine for every request'),
-      '#default_value' => \Drupal::config(adobe_anlaytics . settings)->get('track_search_engine', 0),
-    ];
-  }
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function mymodule_form_adobe_anlaytics_admin_settings_alter(&$form, &$form_state) {
+  $form['general']['adobe_anlaytics_track_search_engine'] = [
+    '#type' => 'checkbox',
+    '#title' => t('Track the referring search engine for every request'),
+    '#default_value' => \Drupal::config(adobe_anlaytics . settings)->get('track_search_engine', 0),
+  ];
+}
 
-?>
-
-Usage
-=====
-You will also need to define what user roles should be tracked.
-Simply tick the roles you would like to monitor.
-
-You can also add JavaScript code in the "Advanced" section of the settings.
-
-All pages will now have the required JavaScript added to the
-HTML footer can confirm this by viewing the page source from
-your browser.
-
-'admin/' pages are automatically ignored by this module.
+```
