@@ -3,13 +3,7 @@
     "description": "Adds Adobe Analytics JavaScript tracking code to your site's pages.",
     "type": "drupal-module",
     "license": "GPL-2.0+",
-    "require-dev": {
-        "behat/mink-extension": "v2.2",
-        "cweagans/composer-patches": "^1.6",
-        "behat/mink-selenium2-driver": "1.3.x-dev",
-        "drupal/coder": "^8.2",
-        "phpmd/phpmd": "^2.6",
-        "phpmetrics/phpmetrics": "^2.3",
-        "php-coveralls/php-coveralls": "v2.0.0"
+    "require": {
+        "drupal/token": "^1.0"
     }
 }
