@@ -5,7 +5,7 @@ Adds the Adobe Analytics system to your website.
 
 
 # Installation
-Install like any other module via Drush or the web administration interface. 
+Install like any other module via Drush or the web administration interface.
 
 # Configuration
 Navigate to Administration > Configuration > Adobe Analytics, where
